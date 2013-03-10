@@ -80,8 +80,6 @@ def request_bounties(from_time, to_time):
     except (NoSectionError, NoOptionError) as e:
         pass
     
-    print 'SE OAuth Key:', se_oauth_key
-    
     page = 1
     page_size = 100
     has_more = True
