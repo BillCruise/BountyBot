@@ -16,13 +16,15 @@ import ConfigParser
 import HTMLParser
 
 from tweepy import *
+from ConfigParser import NoSectionError, NoOptionError
 from time import ctime, gmtime, mktime, strftime
 from urllib2 import urlopen, URLError
 from zlib import decompress, MAX_WBITS
 
 def main():
     # Get the time now and 8 hours ago.
-    to_time = int(mktime(gmtime())) #now
+    to_time = int(mktime(gmtime()))
+    print 'Time Now:', ctime(to_time)
     from_time = to_time - (8 * 60 * 60)
 
     # Add 7 days to those times for bounty expiration comparison.
@@ -69,6 +71,17 @@ def main():
 
 # Get a list of new bounty questions from Stack Overflow.
 def request_bounties(from_time, to_time):
+    config = ConfigParser.RawConfigParser()
+    config.read('settings.cfg')
+    se_oauth_key = None
+
+    try:
+        se_oauth_key = CONSUMER_KEY = config.get('Stack Exchange OAuth', 'KEY')
+    except (NoSectionError, NoOptionError) as e:
+        pass
+    
+    print 'SE OAuth Key:', se_oauth_key
+    
     page = 1
     page_size = 100
     has_more = True
@@ -79,6 +92,8 @@ def request_bounties(from_time, to_time):
         request = 'https://api.stackexchange.com/2.1/questions/featured'
         request += '?page=' + str(page) + '&pagesize=100'
         request += '&order=asc&sort=activity&site=stackoverflow'
+        if se_oauth_key != None:
+            request += '&key=' + se_oauth_key
     
         response = urlopen(request)
         raw_data = response.read()
@@ -255,10 +270,13 @@ def hashify(tag):
 
     return '#' + tag
 
+
+# Write a timestamped message to the specified log file.
 def log(filename, message):
     timestamp = strftime("%Y %b %d %H:%M:%S UTC: ", gmtime())
     with open (filename, 'a') as f:
         f.write (timestamp + message + '\n')
+
 
 if __name__ == '__main__':
     main()
