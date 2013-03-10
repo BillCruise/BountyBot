@@ -21,10 +21,14 @@ Configuration:
 Configuration is controlled through settings.cfg which must be in the same
 directory as bounty_bot.py.  Your Twitter Application ID tokens need to be
 stored in this file to give the script permission to post status messages
-on your Twitter account.
+on your Twitter account.  This section is required, so expect the bounty bot
+script to throw errors if you don't include it.  The Stack Exchange OAuth
+section is optional, but you may run into API throttling if you try to
+run the script too often without it.
 
 http://dev.twitter.com/apps/myappid
 http://dev.twitter.com/apps/myappid/my_token
+http://stackapps.com/apps/oauth/register
 
 Example settings.cfg
 --------------------
@@ -34,6 +38,9 @@ CONSUMER_KEY: Your Consumer Key
 CONSUMER_SECRET: Your Consumer Secret
 ACCESS_TOKEN_KEY: Your Access Token Key
 ACCESS_TOKEN_SECRET: Your Access Token Secret
+
+[Stack Exchange OAuth]
+KEY: Your Stack Exchange OAuth Key
 
 
 Logging:
