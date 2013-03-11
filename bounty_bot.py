@@ -12,19 +12,20 @@
 import json
 import sys
 import tweepy
+import calendar
 import ConfigParser
 import HTMLParser
 
 from tweepy import *
 from ConfigParser import NoSectionError, NoOptionError
-from time import ctime, gmtime, mktime, strftime
+from time import gmtime, strftime
 from urllib2 import urlopen, URLError
 from zlib import decompress, MAX_WBITS
 
 def main():
-    # Get the time now and 8 hours ago.
-    to_time = int(mktime(gmtime()))
-    print 'Time Now:', ctime(to_time)
+    # Get UTC time now and 8 hours ago.
+    to_time = calendar.timegm(gmtime())
+    print 'Time Now:', strftime("%Y %b %d %H:%M:%S UTC", gmtime(to_time))
     from_time = to_time - (8 * 60 * 60)
 
     # Add 7 days to those times for bounty expiration comparison.
@@ -33,11 +34,13 @@ def main():
     from_time += (7 * 24 * 60 * 60)
     to_time += (7 * 24 * 60 * 60)
 
+    from_time_displ = strftime("%Y %b %d %H:%M:%S UTC", gmtime(from_time))
+    to_time_displ = strftime("%Y %b %d %H:%M:%S UTC", gmtime(to_time))
     print 'Expiration target window:'
-    print ctime(from_time)
-    print ctime(to_time)
+    print from_time_displ
+    print to_time_displ
     print
-    window_msg = 'Target Window: ' + ctime(from_time) + ' to ' + ctime(to_time)
+    window_msg = 'Target Window: ' + from_time_displ + ' to ' + to_time_displ
     log('status.log', window_msg)
 
     try:
@@ -53,7 +56,9 @@ def main():
         print status
         log('status.log', status)
 
-        closes_msg = 'Bounty Closes: ' + ctime(max_bounty['bounty_closes_date'])
+        close_time = gmtime(max_bounty['bounty_closes_date'])
+        close_time_fmt = strftime("%Y %b %d %H:%M:%S UTC", close_time)
+        closes_msg = 'Bounty Closes: ' + close_time_fmt
         log('status.log', closes_msg)
         
         tweet(status)
@@ -106,6 +111,7 @@ def request_bounties(from_time, to_time):
             if from_time < close and close < to_time:
                 recent_bounties.append(bounty)
                 print 'Bounty:', count
+                print 'Closes:', close
                 display(bounty)
                 count += 1
 
@@ -120,7 +126,9 @@ def display(bounty):
     print 'Tags:', bounty['tags']
     print 'Bounty Amount:', bounty['bounty_amount']
     print 'Question Score:', bounty['score']
-    print 'Bounty Closes:', ctime(bounty['bounty_closes_date'])
+    close_time = gmtime(bounty['bounty_closes_date'])
+    close_time_fmt = strftime("%Y %b %d %H:%M:%S UTC", close_time)
+    print 'Bounty Closes:', close_time_fmt
     print 'View Count:', bounty['view_count']
     print 'Question Id:', bounty['question_id']
     print 'Is Answered:', bounty['is_answered']
