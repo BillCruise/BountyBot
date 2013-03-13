@@ -22,11 +22,16 @@ from time import gmtime, strftime
 from urllib2 import urlopen, URLError
 from zlib import decompress, MAX_WBITS
 
+HOURS = 8
+USER_ID = 1288 # Your Stack Overflow user id for sharing links
+MAX_TWEET_LEN = 140
+DATE_FORMAT = "%Y %b %d %H:%M:%S UTC"
+
 def main():
     # Get UTC time now and 8 hours ago.
     to_time = calendar.timegm(gmtime())
-    print 'Time Now:', strftime("%Y %b %d %H:%M:%S UTC", gmtime(to_time))
-    from_time = to_time - (8 * 60 * 60)
+    print 'Time Now:', strftime(DATE_FORMAT, gmtime(to_time))
+    from_time = to_time - (HOURS * 60 * 60)
 
     # Add 7 days to those times for bounty expiration comparison.
     # Unfortunately bounty sort orders are not based on the time the bounty
@@ -34,8 +39,8 @@ def main():
     from_time += (7 * 24 * 60 * 60)
     to_time += (7 * 24 * 60 * 60)
 
-    from_time_displ = strftime("%Y %b %d %H:%M:%S UTC", gmtime(from_time))
-    to_time_displ = strftime("%Y %b %d %H:%M:%S UTC", gmtime(to_time))
+    from_time_displ = strftime(DATE_FORMAT, gmtime(from_time))
+    to_time_displ = strftime(DATE_FORMAT, gmtime(to_time))
     print 'Expiration target window:'
     print from_time_displ
     print to_time_displ
@@ -57,7 +62,7 @@ def main():
         log('status.log', status)
 
         close_time = gmtime(max_bounty['bounty_closes_date'])
-        close_time_fmt = strftime("%Y %b %d %H:%M:%S UTC", close_time)
+        close_time_fmt = strftime(DATE_FORMAT, close_time)
         closes_msg = 'Bounty Closes: ' + close_time_fmt
         log('status.log', closes_msg)
         
@@ -127,7 +132,7 @@ def display(bounty):
     print 'Bounty Amount:', bounty['bounty_amount']
     print 'Question Score:', bounty['score']
     close_time = gmtime(bounty['bounty_closes_date'])
-    close_time_fmt = strftime("%Y %b %d %H:%M:%S UTC", close_time)
+    close_time_fmt = strftime(DATE_FORMAT, close_time)
     print 'Bounty Closes:', close_time_fmt
     print 'View Count:', bounty['view_count']
     print 'Question Id:', bounty['question_id']
@@ -163,7 +168,7 @@ def format_status_msg(bounty_json):
     bounty_title = h.unescape(bounty_title)
     
     bounty_link = 'http://stackoverflow.com/q/'
-    bounty_link += str(bounty_json['question_id']) + '/1288'
+    bounty_link += str(bounty_json['question_id']) + '/' + str(USER_ID)
 
     details = 'Amt:' + str(bounty_json['bounty_amount'])
     tags = bounty_json['tags']
@@ -176,8 +181,8 @@ def format_status_msg(bounty_json):
     msg_length = len(bounty_title) + 24 + len(details)
 
     # Truncate the title to fit in a 140 character status message
-    if msg_length > 140:
-        allowed_title_len = 140 - (24 + len(details))
+    if msg_length > MAX_TWEET_LEN:
+        allowed_title_len = MAX_TWEET_LEN - (24 + len(details))
         bounty_title = bounty_title[0:allowed_title_len-3]
         bounty_title = bounty_title.rpartition(' ')[0] + '...'
 
@@ -187,7 +192,7 @@ def format_status_msg(bounty_json):
     tag_index = 1
     while tag_index < len(tags):
         tag = hashify(tags[tag_index])
-        if (len(status) + len(tag) + 1) < 140:
+        if (len(status) + len(tag) + 1) < MAX_TWEET_LEN:
             status += (' ' + tag)
         tag_index += 1
     
@@ -279,7 +284,7 @@ def hashify(tag):
 
 # Write a timestamped message to the specified log file.
 def log(filename, message):
-    timestamp = strftime("%Y %b %d %H:%M:%S UTC: ", gmtime())
+    timestamp = strftime(DATE_FORMAT + ': ', gmtime())
     with open (filename, 'a') as f:
         f.write (timestamp + message + '\n')
 
