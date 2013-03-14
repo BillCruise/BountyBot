@@ -222,63 +222,21 @@ def tweet(status):
 # The most common tags with special characters are covered,
 # with special cases added as needed. (consider retagging on SO)
 def hashify(tag):
-    if tag == 'c++':
-        tag = 'cpp'
-    elif tag == 'c#':
-        tag = 'csharp'
-    elif tag == 'f#':
-        tag = 'fsharp'
-    elif tag == 'asp.net':
-        tag = 'ASPdotNET'
-    elif tag == '.net':
-        tag = 'dotNET'
-    elif tag == 'objective-c':
-        tag = 'ObjectiveC'
-    elif tag == 'ruby-on-rails':
-        tag = 'RubyOnRails'
-    elif tag == 'ruby-on-rails-3':
-        tag = 'RubyOnRails3'
-    elif tag == 'sql-server':
-        tag = 'SQLServer'
-    elif tag == 'sql-server-2005':
-        tag = 'SQLServer2005'
-    elif tag == 'sql-server-2008':
-        tag = 'SQLServer2008'
-    elif tag == 'asp.net-mvc':
-        tag = 'ASPdotNetMVC'
-    elif tag == 'asp.net-mvc-3':
-        tag = 'ASPdotNetMVC3'
-    elif tag == 'vb.net':
-        tag = 'VBdotNET'
-    elif tag == 'visual-studio':
-        tag = 'VisualStudio'
-    elif tag == 'visual-studio-2010':
-        tag = 'VS2010'
-    elif tag == 'web-services':
-        tag = 'webservices'
-    elif tag == 'actionscript-3':
-        tag = 'ActionScript3'
-    elif tag == 'cocoa-touch':
-        tag = 'CocoaTouch'
-    elif tag == 'entity-framework':
-        tag = 'EntityFramework'
-    elif tag == 'jquery-ui':
-        tag = 'jqueryUI'
-    elif tag == 'node.js':
-        tag = 'NodeJS'
-    elif tag == 'internet-explorer':
-        tag = 'IE'
-    elif tag == '.htaccess':
-        tag = 'htaccess'
-    elif tag == 'unit-testing':
-        tag = 'UnitTesting'
-    elif tag == 'google-app-engine':
-        tag = 'GAE'
-    elif tag == 'windows-phone-7':
-        tag = 'WindowsPhone7'
-    elif tag == 'google-maps':
-        tag = 'GoogleMaps'
-
+    tag_dict = {'c++':'cpp', 'c#':'csharp', 'f#':'fsharp',
+                'asp.net':'ASPdotNET', '.net':'dotNET',
+                'objective-c':'ObjectiveC', 'xml-parsing':'XMLparsing',
+                'ruby-on-rails':'RubyOnRails', 'ruby-on-rails-3':'RubyOnRails3',
+                'sql-server':'SQLServer', 'sql-server-2005':'SQLServer2005', 'sql-server-2008':'SQLServer2008',
+                'asp.net-mvc':'ASPdotNetMVC', 'asp.net-mvc-3':'ASPdotNetMVC3',
+                'vb.net':'VBdotNET', 'visual-studio':'VisualStudio', 'visual-studio-2010':'VS2010',
+                'web-services':'webservices', 'ActionScript3':'ActionScript3',
+                'cocoa-touch':'CocoaTouch', 'entity-framework':'EntityFramework',
+                'jquery-ui':'jqueryUI', 'node.js':'NodeJS',
+                'internet-explorer':'IE', '.htaccess':'htaccess',
+                'unit-testing':'UnitTesting', 'windows-phone-7':'WindowsPhone7',
+                'google-maps':'GoogleMaps', 'android-layout':'androidlayout'
+                }
+    tag = tag_dict.get(tag, tag) # returns either mapping or the original tag
     return '#' + tag
 
 
