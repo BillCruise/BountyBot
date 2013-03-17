@@ -68,15 +68,15 @@ def main():
         
         tweet(status)
 
-    except TweepError as te:
-        print te.message
-        log('error.log', te.message)
+    except TweepError:
+        print 'TweepError: ', sys.exc_info()[0]
+        log('error.log', 'TweepError: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
     except URLError:
-        print 'URL error requesting bounties.'
-        log('error.log', 'URL error requesting bounties.')
+        print 'URLError: ', sys.exc_info()[0]
+        log('error.log', 'URLError: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
     except:
         print 'Unexpected error:', sys.exc_info()[0]
-        log('error.log', 'Unexpected error: ' + str(sys.exc_info()[0]))
+        log('error.log', 'Unexpected error: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
 
 
 # Get a list of new bounty questions from Stack Overflow.
