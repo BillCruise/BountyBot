@@ -1,0 +1,15 @@
+cron:
+- description: daily 5AM tweet
+  url: /tweet_bounty
+  schedule: every day 05:00
+  timezone: America/New_York
+  
+- description: daily 1PM tweet
+  url: /tweet_bounty
+  schedule: every day 13:00
+  timezone: America/New_York
+  
+- description: daily 9PM tweet
+  url: /tweet_bounty
+  schedule: every day 21:00
+  timezone: America/New_York

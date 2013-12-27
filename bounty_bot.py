@@ -66,17 +66,20 @@ def main():
         closes_msg = 'Bounty Closes: ' + close_time_fmt
         log('status.log', closes_msg)
         
-        tweet(status)
+        # tweet(status)
 
     except TweepError:
         print 'TweepError: ', sys.exc_info()[0]
         log('error.log', 'TweepError: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
+        log('error.log', status)
     except URLError:
         print 'URLError: ', sys.exc_info()[0]
         log('error.log', 'URLError: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
+        log('error.log', status)
     except:
         print 'Unexpected error:', sys.exc_info()[0]
         log('error.log', 'Unexpected error: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
+        log('error.log', status)
 
 
 # Get a list of new bounty questions from Stack Overflow.
