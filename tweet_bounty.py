@@ -78,7 +78,6 @@ class TweetBounty(webapp2.RequestHandler):
             logging.error(status)
         except:
             logging.error('Unexpected error: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
-            # logging.error(status)
             
 
     # Display the contents of a JSON bounty string.
@@ -137,7 +136,7 @@ class TweetBounty(webapp2.RequestHandler):
             page += 1
 
         return recent_bounties
-
+    
 
 # Find the maximum bounty.
 # Give preference to highest scoring question in case of bounty ties.
@@ -196,6 +195,113 @@ def format_status_msg(bounty_json):
         tag_index += 1
     
     return status
+
+# Tweet the number of bounties, total bounty amount, and top tags for the week.
+class TweetBountyStats(webapp2.RequestHandler):
+    def get(self):
+        try:
+            bounty_count, bounty_total, tag_counts, tag_bounty_totals = self.request_stats()
+        
+            self.response.write('Bounties posted this week: ')
+            self.response.write(str(bounty_count) + '<br/>')
+
+            self.response.write('Total amount of bounties posted: ')
+            self.response.write(str(bounty_total) + '<br/>')
+
+            self.response.write('Average bounty: ')
+            self.response.write(str(bounty_total / bounty_count) + '<br/><br/>')
+
+            status = 'Bounties posted this week: ' + str(bounty_count) + '\n'
+            status += 'Total amount of bounties posted: ' + str(bounty_total) + '\n'
+            status += 'Average bounty: ' + str(bounty_total / bounty_count)
+            tweet(status)
+
+            # Sort tags by number of bounties and display the top 3
+            s_tag_counts = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
+            self.response.write('Top tags by number of bounties: <br/>')
+            self.response.write(s_tag_counts[0][0] + ': ' + str(s_tag_counts[0][1]) + '<br/>')
+            self.response.write(s_tag_counts[1][0] + ': ' + str(s_tag_counts[1][1]) + '<br/>')
+            self.response.write(s_tag_counts[2][0] + ': ' + str(s_tag_counts[2][1]) + '<br/><br/>')
+
+            status = 'Top tags by number of bounties:\n'
+            status += hashify(s_tag_counts[0][0]) + ': ' + str(s_tag_counts[0][1]) + '\n'
+            status += hashify(s_tag_counts[1][0]) + ': ' + str(s_tag_counts[1][1]) + '\n'
+            status += hashify(s_tag_counts[2][0]) + ': ' + str(s_tag_counts[2][1])
+            tweet(status)
+
+            # Sort tags by total amount bountied and display the top 3
+            s_tag_bounty_totals = sorted(tag_bounty_totals.items(), key=lambda x: x[1], reverse=True)
+            self.response.write('Top tags by bounty amount: <br/>')
+            self.response.write(s_tag_bounty_totals[0][0] + ': ' + str(s_tag_bounty_totals[0][1]) + '<br/>')
+            self.response.write(s_tag_bounty_totals[1][0] + ': ' + str(s_tag_bounty_totals[1][1]) + '<br/>')
+            self.response.write(s_tag_bounty_totals[2][0] + ': ' + str(s_tag_bounty_totals[2][1]) + '<br/>')
+        
+            status = 'Top tags by bounty amount:\n'
+            status += hashify(s_tag_bounty_totals[0][0]) + ': ' + str(s_tag_bounty_totals[0][1]) + '\n'
+            status += hashify(s_tag_bounty_totals[1][0]) + ': ' + str(s_tag_bounty_totals[1][1]) + '\n'
+            status += hashify(s_tag_bounty_totals[2][0]) + ': ' + str(s_tag_bounty_totals[2][1])
+            tweet(status)
+
+        except TweepError:
+            logging.error('TweepError: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
+            logging.error(status)
+        except URLError:
+            logging.error('URLError: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
+            logging.error(status)
+        except:
+            logging.error('Unexpected error: ' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]))
+
+    # Get a stats for all bounty questions from Stack Overflow.
+    # Stats returned are total number of bounties, count and
+    # total bounty for each tag.
+    def request_stats(self):
+        config = ConfigParser.RawConfigParser()
+        config.read('settings.cfg')
+        se_oauth_key = None
+
+        try:
+            se_oauth_key = CONSUMER_KEY = config.get('Stack Exchange OAuth', 'KEY')
+        except (NoSectionError, NoOptionError) as e:
+            pass
+    
+        page = 1
+        page_size = 100
+        has_more = True
+
+        bounty_count = 0
+        bounty_total = 0
+        tag_counts = {}
+        tag_bounty_totals = {}
+
+        while(has_more):
+            request = 'https://api.stackexchange.com/2.1/questions/featured'
+            request += '?page=' + str(page) + '&pagesize=100'
+            request += '&order=asc&sort=activity&site=stackoverflow'
+            if se_oauth_key != None:
+                request += '&key=' + se_oauth_key
+    
+            response = urlopen(request)
+            raw_data = response.read()
+            data = json.loads(raw_data)
+    
+            bounties = data['items']
+            has_more = data['has_more']
+    
+            for bounty in bounties:
+                bounty_count += 1
+                bounty_total += bounty['bounty_amount']
+                tags = bounty['tags']
+                for tag in tags:
+                    if tag in tag_counts:
+                        tag_counts[tag] += 1
+                        tag_bounty_totals[tag] += bounty['bounty_amount']
+                    else:
+                        tag_counts[tag] = 1
+                        tag_bounty_totals[tag] = bounty['bounty_amount']
+            page += 1
+
+        return bounty_count, bounty_total, tag_counts, tag_bounty_totals
+
     
 
 # Update the Twitter account authorized  
@@ -243,5 +349,6 @@ def hashify(tag):
 
 
 app = webapp2.WSGIApplication([
-    ('/tweet_bounty', TweetBounty)
+    ('/tweet_bounty', TweetBounty),
+    ('/tweet_bounty_stats', TweetBountyStats)
 ], debug=False)

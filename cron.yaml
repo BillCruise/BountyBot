@@ -13,3 +13,8 @@ cron:
   url: /tweet_bounty
   schedule: every day 21:00
   timezone: America/New_York
+
+- description: weekly stats tweets
+  url: /tweet_bounty_stats
+  schedule: every sunday 12:00
+  timezone: America/New_York

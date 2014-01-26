@@ -13,6 +13,10 @@ handlers:
   script: tweet_bounty.app
   login: admin
 
+- url: /tweet_bounty_stats
+  script: tweet_bounty.app
+  login: admin
+
 - url: .*
   script: main.app
 
