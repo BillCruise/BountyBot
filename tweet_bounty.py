@@ -201,45 +201,35 @@ class TweetBountyStats(webapp2.RequestHandler):
     def get(self):
         try:
             bounty_count, bounty_total, tag_counts, tag_bounty_totals = self.request_stats()
-        
-            self.response.write('Bounties posted this week: ')
-            self.response.write(str(bounty_count) + '<br/>')
-
-            self.response.write('Total amount of bounties posted: ')
-            self.response.write(str(bounty_total) + '<br/>')
-
-            self.response.write('Average bounty: ')
-            self.response.write(str(bounty_total / bounty_count) + '<br/><br/>')
+            
+            self.display_stats(bounty_count, bounty_total)
 
             status = 'Bounties posted this week: ' + str(bounty_count) + '\n'
             status += 'Total amount of bounties posted: ' + str(bounty_total) + '\n'
             status += 'Average bounty: ' + str(bounty_total / bounty_count)
             tweet(status)
 
-            # Sort tags by number of bounties and display the top 3
+            # The two sorts below return lists of (key,value) tuples sorted by values.
+            key, val = 0, 1
+
+            # Sort tags by number of bounties
             s_tag_counts = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
-            self.response.write('Top tags by number of bounties: <br/>')
-            self.response.write(s_tag_counts[0][0] + ': ' + str(s_tag_counts[0][1]) + '<br/>')
-            self.response.write(s_tag_counts[1][0] + ': ' + str(s_tag_counts[1][1]) + '<br/>')
-            self.response.write(s_tag_counts[2][0] + ': ' + str(s_tag_counts[2][1]) + '<br/><br/>')
-
-            status = 'Top tags by number of bounties:\n'
-            status += hashify(s_tag_counts[0][0]) + ': ' + str(s_tag_counts[0][1]) + '\n'
-            status += hashify(s_tag_counts[1][0]) + ': ' + str(s_tag_counts[1][1]) + '\n'
-            status += hashify(s_tag_counts[2][0]) + ': ' + str(s_tag_counts[2][1])
-            tweet(status)
-
-            # Sort tags by total amount bountied and display the top 3
+            # Sort tags by total amount bountied
             s_tag_bounty_totals = sorted(tag_bounty_totals.items(), key=lambda x: x[1], reverse=True)
-            self.response.write('Top tags by bounty amount: <br/>')
-            self.response.write(s_tag_bounty_totals[0][0] + ': ' + str(s_tag_bounty_totals[0][1]) + '<br/>')
-            self.response.write(s_tag_bounty_totals[1][0] + ': ' + str(s_tag_bounty_totals[1][1]) + '<br/>')
-            self.response.write(s_tag_bounty_totals[2][0] + ': ' + str(s_tag_bounty_totals[2][1]) + '<br/>')
-        
+
+            self.display_top_tags(s_tag_counts, s_tag_bounty_totals)
+
+            # Compose status messages and tweet
+            status = 'Top tags by number of bounties:\n'
+            status += hashify(s_tag_counts[0][key]) + ': ' + str(s_tag_counts[0][val]) + '\n'
+            status += hashify(s_tag_counts[1][key]) + ': ' + str(s_tag_counts[1][val]) + '\n'
+            status += hashify(s_tag_counts[2][key]) + ': ' + str(s_tag_counts[2][val])
+            tweet(status)
+            
             status = 'Top tags by bounty amount:\n'
-            status += hashify(s_tag_bounty_totals[0][0]) + ': ' + str(s_tag_bounty_totals[0][1]) + '\n'
-            status += hashify(s_tag_bounty_totals[1][0]) + ': ' + str(s_tag_bounty_totals[1][1]) + '\n'
-            status += hashify(s_tag_bounty_totals[2][0]) + ': ' + str(s_tag_bounty_totals[2][1])
+            status += hashify(s_tag_bounty_totals[0][key]) + ': ' + str(s_tag_bounty_totals[0][val]) + '\n'
+            status += hashify(s_tag_bounty_totals[1][key]) + ': ' + str(s_tag_bounty_totals[1][val]) + '\n'
+            status += hashify(s_tag_bounty_totals[2][key]) + ': ' + str(s_tag_bounty_totals[2][val])
             tweet(status)
 
         except TweepError:
@@ -302,7 +292,29 @@ class TweetBountyStats(webapp2.RequestHandler):
 
         return bounty_count, bounty_total, tag_counts, tag_bounty_totals
 
-    
+    # Display the number of bounties posted, total amount, and average bounty
+    def display_stats(self, bounty_count, bounty_total):
+        self.response.write('Bounties posted this week: ')
+        self.response.write(str(bounty_count) + '<br/>')
+
+        self.response.write('Total amount of bounties posted: ')
+        self.response.write(str(bounty_total) + '<br/>')
+
+        self.response.write('Average bounty: ')
+        self.response.write(str(bounty_total / bounty_count) + '<br/><br/>')
+
+    # Display the top tags sorted by number of bounties and total bounty amount
+    def display_top_tags(self, s_tag_counts, s_tag_bounty_totals):
+        key, val = 0, 1
+        
+        self.response.write('Top tags by number of bounties: <br/>')
+        for tag in range(0, 3):
+            self.response.write(s_tag_counts[tag][key] + ': ' + str(s_tag_counts[tag][val]) + '<br/>')
+
+        self.response.write('<br/>Top tags by bounty amount: <br/>')
+        for tag in range(0, 3):
+            self.response.write(s_tag_bounty_totals[tag][key] + ': ' + str(s_tag_bounty_totals[tag][val]) + '<br/>')
+
 
 # Update the Twitter account authorized  
 # in settings.cfg with a status message.
