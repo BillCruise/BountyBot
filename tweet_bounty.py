@@ -345,7 +345,9 @@ def hashify(tag):
                 'ruby-on-rails':'RubyOnRails', 'ruby-on-rails-3':'RubyOnRails3',
                 'sql-server':'SQLServer', 'sql-server-2005':'SQLServer2005',
                 'sql-server-2008':'SQLServer2008',
-                'asp.net-mvc':'ASPdotNetMVC', 'asp.net-mvc-3':'ASPdotNetMVC3',
+                'asp.net-mvc':'ASPdotNetMVC', 'asp.net-mvc-2':'ASPdotNetMVC2',
+                'asp.net-mvc-3':'ASPdotNetMVC3', 'asp.net-mvc-4':'ASPdotNetMVC4',
+                'asp.net-mvc-5':'ASPdotNetMVC5', 'asp.net-mvc-6':'ASPdotNetMVC6',
                 'vb.net':'VBdotNET', 'visual-studio':'VisualStudio',
                 'visual-studio-2010':'VS2010',
                 'web-services':'webservices', 'ActionScript3':'ActionScript3',
@@ -357,6 +359,7 @@ def hashify(tag):
                 }
     tag = tag_dict.get(tag, tag) # returns either mapping or the original tag
     tag = remove_hyphens(tag)
+    tag = tag.replace(".js", "")
     return '#' + tag
 
 # Removes hyphens from a tag and capitalizes each word.
