@@ -356,7 +356,7 @@ def hashify(tag):
                 'google-maps':'GoogleMaps', 'android-layout':'androidlayout'
                 }
     tag = tag_dict.get(tag, tag) # returns either mapping or the original tag
-	tag = remove_hyphens(tag)
+    tag = remove_hyphens(tag)
     return '#' + tag
 
 # Removes hyphens from a tag and capitalizes each word.
